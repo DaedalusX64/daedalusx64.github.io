@@ -32,14 +32,14 @@
             <br>
 
 			<!-- Just kinda leaving this here so we can append a tag to it later.. -->
-            <center id="lists">
-            </center>
+            <div style="margin-left: 15%; margin-right: 15%" id="lists">
+			</div>
 
 			<!-- Use GitHub API to retrieve all issues, create tags for them -->
             <script>
                 // Send GET request to try and obtain the JSON
                 var request = new XMLHttpRequest();
-                request.open('GET', 'https://api.github.com/repos/DaedalusX64/compatibility-list/issues', true);
+                request.open('GET', 'https://api.github.com/repos/DaedalusX64/compatibility-list/issues?per_page=100', true);
                 request.send(null);
 
 				// Just a variable to store all of our entries
@@ -69,12 +69,7 @@
 
 				// push to html
 				function add_list_entry(entry) {
-					// if there's no labels, this hasn't been approved yet, so dont push
-					// FIXME - this still errors, but doesnt break lol
-					if (entry.labels[0].name == undefined)
-						return;
-					
-					// also cut if its a closed issue, most likely a duplicate or doesn't
+					// cut if its a closed issue, most likely a duplicate or doesn't
 					// match the desired format
 					if (entry.state != "open")
 						return;
@@ -98,11 +93,20 @@
 					element.appendChild(hiphen);
 
 					// Playability status
+					var status_string;
 					var status = document.createElement("span");
-					var status_text = document.createTextNode(entry.labels[0].name);
-					status.appendChild(status_text);
-					
-					switch(entry.labels[0].name) {
+					var status_text;
+
+					// check to see if we're trying to list something without a tag
+					if (entry.labels[0] != undefined) {
+						status_string = entry.labels[0].name;
+					} else {
+						status_string = "Under Review";
+					}
+
+					status_text = document.createTextNode(status_string);
+						
+					switch(status_string) {
 						case "Excellent":
 							status.style.color = "#01ad10";
 							break;
@@ -112,9 +116,14 @@
 						case "Unplayable":
 							status.style.color = "#8c0000";
 							break;
+						case "Under Review":
+							status.style.color = "#fcba03";
+							break;
 						default:
 							break;
 					}
+
+					status.appendChild(status_text);
 
 					status.style.fontSize = "120%";
 					status.style.fontWeight = "bold";
